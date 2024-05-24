@@ -9,6 +9,7 @@ export class OdooProcessManager {
 
   constructor(wsManager: WebSocketManager) {
     this.wsManager = wsManager;
+    this.currentContainer = "";
   }
 
   public startShell(req: Request, res: Response) {
@@ -44,8 +45,7 @@ export class OdooProcessManager {
     });
     this.currentContainer = containerName;
     res.json({
-      message:
-        "Odoo shell started successfully at " + containerName ,
+      message: "Odoo shell started successfully at " + containerName,
     });
   }
 

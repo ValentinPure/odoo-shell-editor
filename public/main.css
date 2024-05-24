@@ -45,7 +45,9 @@ main {
   padding: 10px;
   background-color: #333;
 }
-
+#control-panel input {
+  width: 100%;
+}
 #control-panel button {
   padding: 10px 20px;
   margin: 5px;

@@ -42,6 +42,9 @@ export class OdooProcessManager {
       console.log(`Odoo process exited with code ${exitCode}`);
       this.odooProcess = null;
       this.wsManager.send({ type: "exit", code: exitCode });
+      res.json({
+        message: `Odoo process exited with code ${exitCode}`,
+      });
     });
     this.currentContainer = containerName;
     res.json({

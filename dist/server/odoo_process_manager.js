@@ -31,6 +31,7 @@ class OdooProcessManager {
     currentContainer;
     constructor(wsManager) {
         this.wsManager = wsManager;
+        this.currentContainer = "";
     }
     startShell(req, res) {
         const { containerName } = req.body;
@@ -56,6 +57,9 @@ class OdooProcessManager {
             console.log(`Odoo process exited with code ${exitCode}`);
             this.odooProcess = null;
             this.wsManager.send({ type: "exit", code: exitCode });
+            res.json({
+                message: `Odoo process exited with code ${exitCode}`,
+            });
         });
         this.currentContainer = containerName;
         res.json({

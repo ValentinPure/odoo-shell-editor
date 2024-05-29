@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const startShellButton = document.getElementById("start-shell");
   const runButton = document.getElementById("run");
   const outputDiv = document.getElementById("output");
+  
+  
   const containerNameInput = document.getElementById(
     "container-name",
   ) as HTMLInputElement;
@@ -29,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     lineNumbers: true,
     mode: "python",
   });
+
 
   startShellButton.addEventListener("click", () => {
     startShell(containerNameInput.value);
@@ -114,4 +117,77 @@ function displayMessage(message: string, isError: boolean) {
   }
   outputDiv.appendChild(messageElement);
   outputDiv.scrollTop = outputDiv.scrollHeight; // Scroll to the bottom
+}
+
+const snippetsContainer = document.getElementById("snippets-container");
+interface Snippet {
+  title: string;
+  code: string;
+}
+
+if (snippetsContainer) {
+  fetch("snippets.json")
+    .then(response => response.json())
+    .then((data: Snippet []) => {
+      data.forEach(snippet => {
+        addSnippetToDOM(snippet);
+      });
+    })
+    .catch(error => console.error("Error fetching snippets:", error));
+}
+
+const form = document.getElementById("add-snippet-form") as HTMLFormElement;
+form.addEventListener("submit", function(event: Event) {
+  event.preventDefault();
+
+  const titleInput = document.getElementById("title") as HTMLInputElement;
+  const codeInput = document.getElementById("snippet") as HTMLTextAreaElement;
+
+  const title = titleInput.value;
+  const code = codeInput.value;
+
+  const newSnippet: Snippet = { title, code };
+  
+  // Add the new snippet to the DOM
+  addSnippetToDOM(newSnippet);
+  
+  fetch('/snippets', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(newSnippet)
+  }).then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.text();
+  }).then(data => {
+    console.log('Snippet added:', data);
+  }).catch(error => {
+    console.error('Error adding snippet:', error);
+  });
+
+  // Clear the form
+  form.reset();
+});
+
+function addSnippetToDOM(snippet: Snippet): void {
+  const snippetDiv = document.createElement("div");
+  snippetDiv.classList.add("code-snippet");
+
+  const title = document.createElement("h3");
+  title.textContent = snippet.title;
+
+  const pre = document.createElement("pre");
+  const code = document.createElement("snippet");
+  code.textContent = snippet.code;
+  pre.appendChild(code);
+
+  snippetDiv.appendChild(title);
+  snippetDiv.appendChild(pre);
+
+  if (snippetsContainer) {
+    snippetsContainer.appendChild(snippetDiv);
+  }
 }

@@ -20,9 +20,20 @@
           placeholder="Container name"
           value="agence-pure-illusion-teractem_odoo"
         />
+        <div id="box">
+          <div id="snippets-container"></div>
+
+          <form id="add-snippet-form">
+            <input type="text" id="title" placeholder="Title" required>
+            <textarea id="snippet" placeholder="snippet" required></textarea>
+            <button type="submit">Add Snippet</button>
+          </form>
       </div>
       <div id="output"></div>
+      
+      
     </main>
+    
 
     <script src="./dist/client/codemirror/lib/codemirror.js"></script>
     <script src="./dist/client/codemirror/mode/python/python.js"></script>

@@ -7,6 +7,7 @@ exports.Server = void 0;
 const express_1 = __importDefault(require("express"));
 const path_1 = __importDefault(require("path"));
 const http_1 = __importDefault(require("http"));
+const fs_1 = __importDefault(require("fs"));
 const web_socket_manager_1 = require("./web_socket_manager");
 const odoo_process_manager_1 = require("./odoo_process_manager");
 class Server {
@@ -15,6 +16,7 @@ class Server {
     wsManager;
     odooProcessManager;
     PORT = 3000;
+    SNIPPETS_FILE = path_1.default.join(__dirname, 'snippets.json');
     constructor() {
         this.app = (0, express_1.default)();
         this.server = http_1.default.createServer(this.app);
@@ -31,6 +33,34 @@ class Server {
     configureRoutes() {
         this.app.post("/start-shell", (req, res) => this.odooProcessManager.startShell(req, res));
         this.app.post("/run-code", (req, res) => this.odooProcessManager.runCode(req, res));
+        this.app.get('/snippets', (req, res) => {
+            fs_1.default.readFile(this.SNIPPETS_FILE, 'utf8', (err, data) => {
+                if (err) {
+                    res.status(500).send('Error reading snippets file');
+                    return;
+                }
+                res.json(JSON.parse(data));
+            });
+        });
+        // Endpoint pour ajouter un nouveau snippet
+        this.app.post('/snippets', (req, res) => {
+            const newSnippet = req.body;
+            fs_1.default.readFile(this.SNIPPETS_FILE, 'utf8', (err, data) => {
+                if (err) {
+                    res.status(500).send('Error reading snippets file');
+                    return;
+                }
+                const snippets = JSON.parse(data);
+                snippets.push(newSnippet);
+                fs_1.default.writeFile(this.SNIPPETS_FILE, JSON.stringify(snippets, null, 2), (err) => {
+                    if (err) {
+                        res.status(500).send('Error writing snippets file');
+                        return;
+                    }
+                    res.status(201).send('Snippet added');
+                });
+            });
+        });
     }
     start() {
         this.server.listen(this.PORT, () => {

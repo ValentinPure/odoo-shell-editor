@@ -1,0 +1,14 @@
+[
+    {
+      "title": "Snippet 1",
+      "code": "console.log('Snippet 1');"
+    },
+    {
+      "title": "Snippet 2",
+      "code": "console.log('Snippet 2');"
+    },
+    {
+      "title": "Snippet 3",
+      "code": "console.log('Snippet 3');"
+    }
+]

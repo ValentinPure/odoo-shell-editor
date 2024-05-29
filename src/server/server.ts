@@ -1,21 +1,30 @@
 import express from "express";
 import path from "path";
 import http from "http";
+import bodyParser from 'body-parser';
+import fs from 'fs';
 import { WebSocketManager } from "./web_socket_manager";
 import { OdooProcessManager } from "./odoo_process_manager";
+
+
+
 
 export class Server {
   private app: express.Application;
   private server: http.Server;
   private wsManager: WebSocketManager;
   private odooProcessManager: OdooProcessManager;
+
   private PORT: number = 3000;
+  private SNIPPETS_FILE: string = path.join(__dirname, 'snippets.json');
+  
 
   constructor() {
     this.app = express();
     this.server = http.createServer(this.app);
     this.wsManager = new WebSocketManager(this.server);
     this.odooProcessManager = new OdooProcessManager(this.wsManager);
+
 
     this.configureMiddleware();
     this.configureRoutes();
@@ -37,7 +46,40 @@ export class Server {
     this.app.post("/run-code", (req, res) =>
       this.odooProcessManager.runCode(req, res),
     );
-  }
+    this.app.get('/snippets', (req, res) => {
+      fs.readFile(this.SNIPPETS_FILE, 'utf8', (err, data) => {
+        if (err) {
+          res.status(500).send('Error reading snippets file');
+          return;
+        }
+        res.json(JSON.parse(data));
+      });
+    });
+
+    // Endpoint pour ajouter un nouveau snippet
+    this.app.post('/snippets', (req, res) => {
+      const newSnippet = req.body;
+
+      fs.readFile(this.SNIPPETS_FILE, 'utf8', (err, data) => {
+        if (err) {
+          res.status(500).send('Error reading snippets file');
+          return;
+        }
+
+        const snippets = JSON.parse(data);
+        snippets.push(newSnippet);
+
+        fs.writeFile(this.SNIPPETS_FILE, JSON.stringify(snippets, null, 2), (err) => {
+          if (err) {
+            res.status(500).send('Error writing snippets file');
+            return;
+          }
+          res.status(201).send('Snippet added');
+        });
+      });
+    });
+    }
+  
 
   public start() {
     this.server.listen(this.PORT, () => {
@@ -45,3 +87,5 @@ export class Server {
     });
   }
 }
+
+

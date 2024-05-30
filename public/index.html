@@ -11,27 +11,27 @@
     <h1>Odoo Shell Editor</h1>
     <main>
       <textarea id="code" name="code"></textarea>
-      <div id="control-panel">
-        <button id="start-shell">Start Shell</button>
-        <button id="run">Run</button>
-        <input
-          type="text"
-          id="container-name"
-          placeholder="Container name"
-          value="agence-pure-illusion-teractem_odoo"
-        />
-        <div id="box">
-          <div id="snippets-container"></div>
-
-          <form id="add-snippet-form">
-            <input type="text" id="title" placeholder="Title" required>
-            <textarea id="snippet" placeholder="snippet" required></textarea>
-            <button type="submit">Add Snippet</button>
-          </form>
-      </div>
+    <div id="control-panel">
+      <button id="start-shell">Start Shell</button>
+      <button id="run">Run</button>
+      <input
+        type="text"
+        id="container-name"
+        placeholder="Container name"
+        value="agence-pure-illusion-teractem_odoo"
+      />
+    </div>
+    <div id="content-container">
       <div id="output"></div>
-      
-      
+      <div id="box">
+        <div id="snippets-container"></div>
+        <form id="add-snippet-form">
+          <input type="text" id="title" placeholder="Title" required>
+          <textarea id="snippet" placeholder="Snippet" required></textarea>
+          <button type="submit">Add Snippet</button>
+        </form>
+      </div>
+    </div>
     </main>
     
 

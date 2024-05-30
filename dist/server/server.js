@@ -16,7 +16,7 @@ class Server {
     wsManager;
     odooProcessManager;
     PORT = 3000;
-    SNIPPETS_FILE = path_1.default.join(__dirname, 'snippets.json');
+    SNIPPETS_FILE = path_1.default.resolve(__dirname, 'snippets.json');
     constructor() {
         this.app = (0, express_1.default)();
         this.server = http_1.default.createServer(this.app);
@@ -44,21 +44,15 @@ class Server {
         });
         // Endpoint pour ajouter un nouveau snippet
         this.app.post('/snippets', (req, res) => {
-            const newSnippet = req.body;
-            fs_1.default.readFile(this.SNIPPETS_FILE, 'utf8', (err, data) => {
+            console.log('Received request to add snippet:', req.body);
+            const { title, code } = req.body;
+            const snippet = { title, code };
+            fs_1.default.writeFile(this.SNIPPETS_FILE, JSON.stringify(snippet, null, 2), (err) => {
                 if (err) {
-                    res.status(500).send('Error reading snippets file');
+                    res.status(500).send({ status: false, message: 'failed to write the snippet' });
                     return;
                 }
-                const snippets = JSON.parse(data);
-                snippets.push(newSnippet);
-                fs_1.default.writeFile(this.SNIPPETS_FILE, JSON.stringify(snippets, null, 2), (err) => {
-                    if (err) {
-                        res.status(500).send('Error writing snippets file');
-                        return;
-                    }
-                    res.status(201).send('Snippet added');
-                });
+                res.status(201).send({ status: true, message: 'Succeed' });
             });
         });
     }

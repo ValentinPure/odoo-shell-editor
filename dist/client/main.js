@@ -1,6 +1,5 @@
 "use strict";
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("Hello, TypeScript!");
     const codeTextarea = document.getElementById("code");
     const startShellButton = document.getElementById("start-shell");
     const runButton = document.getElementById("run");
@@ -33,6 +32,71 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Running code:", codeMirrorValue);
         sendCodeToServer(codeMirrorValue);
     });
+    const snippetsContainer = document.getElementById("snippets-container");
+    if (snippetsContainer) {
+        fetch("snippets.json")
+            .then(response => response.json())
+            .then((data) => {
+            data.forEach(snippet => {
+                addSnippetToDOM(snippet);
+            });
+        })
+            .catch(error => console.error("Error fetching snippets:", error));
+    }
+    const form = document.getElementById("add-snippet-form");
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const titleInput = document.getElementById("title");
+        const codeInput = document.getElementById("snippet");
+        const title = titleInput.value;
+        const code = codeInput.value;
+        const newSnippet = { title, code };
+        fetch('/snippets', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newSnippet)
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        }).then(data => {
+            console.log(data);
+            if (data.status)
+                displayMessage(data.message);
+        }).catch(error => {
+            console.log(error);
+            displayMessage(error.message);
+        });
+        // Add the new snippet to the DOM
+        addSnippetToDOM(newSnippet);
+        // Clear the form
+        form.reset();
+    });
+    function addSnippetToDOM(snippet) {
+        const snippetDiv = document.createElement("div");
+        snippetDiv.classList.add("code-snippet");
+        const title = document.createElement("h3");
+        title.textContent = snippet.title;
+        const pre = document.createElement("pre");
+        const code = document.createElement("snippet");
+        code.textContent = snippet.code;
+        pre.appendChild(code);
+        const addButton = document.createElement("button");
+        addButton.textContent = "Add to Code";
+        addButton.classList.add("add-to-code-button");
+        addButton.addEventListener("click", () => {
+            editor.setValue(editor.getValue() + "\n" + snippet.code + "\n");
+        });
+        snippetDiv.appendChild(title);
+        snippetDiv.appendChild(pre);
+        snippetDiv.appendChild(addButton);
+        if (snippetsContainer) {
+            snippetsContainer.appendChild(snippetDiv);
+        }
+    }
     setupWebSocket();
 });
 function startShell(containerName) {
@@ -94,7 +158,7 @@ function setupWebSocket() {
         console.log("WebSocket connection closed");
     };
 }
-function displayMessage(message, isError) {
+function displayMessage(message, isError = false) {
     const outputDiv = document.getElementById("output");
     const messageElement = document.createElement("div");
     messageElement.textContent = message;
@@ -103,59 +167,4 @@ function displayMessage(message, isError) {
     }
     outputDiv.appendChild(messageElement);
     outputDiv.scrollTop = outputDiv.scrollHeight; // Scroll to the bottom
-}
-const snippetsContainer = document.getElementById("snippets-container");
-if (snippetsContainer) {
-    fetch("snippets.json")
-        .then(response => response.json())
-        .then((data) => {
-        data.forEach(snippet => {
-            addSnippetToDOM(snippet);
-        });
-    })
-        .catch(error => console.error("Error fetching snippets:", error));
-}
-const form = document.getElementById("add-snippet-form");
-form.addEventListener("submit", function (event) {
-    event.preventDefault();
-    const titleInput = document.getElementById("title");
-    const codeInput = document.getElementById("snippet");
-    const title = titleInput.value;
-    const code = codeInput.value;
-    const newSnippet = { title, code };
-    // Add the new snippet to the DOM
-    addSnippetToDOM(newSnippet);
-    fetch('/snippets', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newSnippet)
-    }).then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.text();
-    }).then(data => {
-        console.log('Snippet added:', data);
-    }).catch(error => {
-        console.error('Error adding snippet:', error);
-    });
-    // Clear the form
-    form.reset();
-});
-function addSnippetToDOM(snippet) {
-    const snippetDiv = document.createElement("div");
-    snippetDiv.classList.add("code-snippet");
-    const title = document.createElement("h3");
-    title.textContent = snippet.title;
-    const pre = document.createElement("pre");
-    const code = document.createElement("snippet");
-    code.textContent = snippet.code;
-    pre.appendChild(code);
-    snippetDiv.appendChild(title);
-    snippetDiv.appendChild(pre);
-    if (snippetsContainer) {
-        snippetsContainer.appendChild(snippetDiv);
-    }
 }
